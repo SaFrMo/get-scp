@@ -1,6 +1,21 @@
 "use strict";
 
-const	http		= require('http');
+const	http		= require('http'),
+		express		= require('express'),
+		app			= express();
+
+app.get('/', (req, res) => {
+	res.send('Hello world!');
+});
+
+app.listen(3000, () => {
+	console.log('Listening on 3000');
+});
+
+
+
+
+
 
 const getScp = function( index ){
 	
@@ -36,5 +51,3 @@ const getScp = function( index ){
 	
 	console.log(options.path);	
 }
-
-getScp();
