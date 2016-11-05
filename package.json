@@ -10,8 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "async": "^2.1.2",
     "express": "^4.14.0",
-    "http": "0.0.0"
+    "jsdom": "^9.8.3"
   }
 }

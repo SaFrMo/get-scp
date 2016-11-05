@@ -1,7 +1,6 @@
 "use strict";
 
-const	http		= require('http'),
-		async		= require('async'),
+const	jsdom		= require('jsdom'),
 		express		= require('express'),
 		app			= express();
 
@@ -11,40 +10,19 @@ app.get('/', (req, res) => {
 
 app.get('/:index', (req, res) => {
 
-	let index = req.params.index;
+	jsdom.env(
+		`http://www.scp-wiki.net/scp-${req.params.index}`,
+		["http://code.jquery.com/jquery.js"],
+		function (err, window) {
+			// Find main content
+			let $content = window.$('#page-content');
+			// Strip out all inline styling
+			$content.find('*').attr('style', '');
+			// Return bare-bones content
+			res.send( $content.html() );
+		}
+	);
 
-	// Search cache for saved SCP
-	// If we have a saved version, try to check for any updates
-	
-	// If we don't have a cached version
-	let options = {
-		host: 'www.scp-wiki.net',
-		path: `/scp-${index}`
-	}
-	
-	// Make request
-	let request = http.request(options, (httpResponse) => {
-		
-		console.log('Loading');
-		
-		let data = '';
-		httpResponse.on('data', (chunk) => {
-			data += chunk;
-			console.log('Loading...');
-		});
-		httpResponse.on('end', () => {
-			res.send(data);
-		});
-		
-	});
-	
-	request.on('error', (err) => {
-		console.log(err.message);
-		request.end();
-	});
-	
-	request.end();
-	
 });
 
 app.listen(3000, () => {
