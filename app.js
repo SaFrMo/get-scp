@@ -25,6 +25,6 @@ app.get('/:index', (req, res) => {
 
 });
 
-app.listen(3000, () => {
-	console.log('Listening on 3000');
+app.listen( process.env.port || 5000 , () => {
+	console.log(`Listening on ${process.env.port || 5000}`);
 });
