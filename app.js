@@ -6,6 +6,7 @@ const	jsdom		= require('jsdom'),
 		router		= express.Router(),
 		mongoose	= require('mongoose'),
 		scpEntry	= require('./app/models/scp-entry');
+// TODO: Use cheerio instead of jsdom
 		
 mongoose.connect('mongodb://heroku_vz0kc1kv:up2to1q6n74h57pmdikv99f5lb@ds149437.mlab.com:49437/heroku_vz0kc1kv');
 
