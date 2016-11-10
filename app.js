@@ -17,23 +17,19 @@ router.route('/:index')
 
 	// Get an entry
 	.get( (req, res) => {
+	
+		// resolveArticle().then(data => res.json({ message: 'worked!', data: data})).catch((err, data) => res.json({ message: err, data: data });
 		
-		scpEntry.findOne( {'number': `${req.params.index}`}, 'entry', (err, entry) => {
-			
-			if( err ){
-				res.json({
-					message: err
-				});
-			} 
+		scpEntry.findOne( {'number': `${req.params.index}`}, 'entry').exec().then(entry => {
 			
 			// We don't have an existing entry, so create one
 			if( entry == null ){
-				createMLabEntry(req.params.index, newEntry => {
+				createMLabEntry(req.params.index).then(newEntry => {
 					res.json({
 						message: `Created entry for ${req.params.index}!`,
 						data: newEntry
 					});
-				});
+				}).catch(err => console.log(err))
 			} else {
 				res.json({
 					message: 'Success!',
@@ -41,7 +37,11 @@ router.route('/:index')
 				});
 			}
 			
-		});
+		}).catch(err => {
+			return res.json({
+				message: err
+			});
+		})
 		
 	})
 	
@@ -54,34 +54,38 @@ router.route('/:index')
 );
 
 // Get an entry from the actual SCP Wiki
-const getWikiEntry = (index, callback) => {
+const getWikiEntry = (index) => {
 	
-	jsdom.env(
-		`http://www.scp-wiki.net/scp-${index}`,
-		["https://code.jquery.com/jquery-3.1.1.min.js"],
-		function (err, window) {
-			// Find main content
-			let $content = window.$('#page-content');
-			// Strip out all inline styling
-			$content.find('*').attr('style', '');
-			// Return bare-bones content
-			callback( $content.html() );
-			// TODO: Error handling
-		}
-	);
+	return new Promise(function(resolve, reject){
+	
+		jsdom.env(
+			`http://www.scp-wiki.net/scp-${index}`,
+			["https://code.jquery.com/jquery-3.1.1.min.js"],
+			function (err, window) {
+				if ( err ) return reject(err);
+
+				// Find main content
+				let $content = window.$('#page-content');
+				// Strip out all inline styling
+				$content.find('*').attr('style', '');
+				// Return bare-bones content
+				return resolve($content.html());
+				// TODO: Error handling
+			}
+		);
+	
+	});
 	
 };
 
-const createMLabEntry = (index, callback) => {
-	getWikiEntry(index, data => {
+const createMLabEntry = (index) => {
+	return getWikiEntry(index).then(data => {
 		let entry = new scpEntry();
 		entry.number = index;
 		entry.entry = data;
-				
-		entry.save( err => {
-			callback( err ? err : entry );
-		});
-	});
+
+		return entry.save().exec();
+	}).catch(err => console.log(err))
 };
 
 app.use('/', router);
